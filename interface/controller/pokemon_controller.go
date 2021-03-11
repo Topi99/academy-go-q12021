@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/Topi99/academy-go-q12021/usecase/interactor"
+	"github.com/Topi99/academy-go-q12021/usecase/repository"
 )
 
 type pokemonController struct {
@@ -25,7 +28,11 @@ func (po *pokemonController) GetOne(c Context) error {
 	idU64, err := strconv.ParseUint(c.Param("id"), 10, 32)
 
 	if err != nil {
-		return err
+		return NewHTTPError(
+			http.StatusInternalServerError,
+			"ServerError",
+			"Error while formating 'id'",
+		)
 	}
 
 	id := uint(idU64)
@@ -33,6 +40,13 @@ func (po *pokemonController) GetOne(c Context) error {
 	p, err := po.pokemonInteractor.GetOne(id)
 
 	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return NewHTTPError(
+				http.StatusNotFound,
+				"NotFound",
+				fmt.Sprintf("Pokemon with ID '%v'", idU64),
+			)
+		}
 		return err
 	}
 
