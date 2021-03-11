@@ -8,6 +8,7 @@ import (
 
 // NewRouter creates new echo.Echo router
 func NewRouter(e *echo.Echo, c controller.AppController) *echo.Echo {
+	e.HTTPErrorHandler = HTTPErrorHandler
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
